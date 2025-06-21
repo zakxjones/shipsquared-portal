@@ -1,19 +1,24 @@
-import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
+import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  // `withAuth` augments your `Request` with the user's token.
-  function middleware(request: NextRequestWithAuth) {
-    const { pathname } = request.nextUrl;
-    const { token } = request.nextauth;
+  function middleware(req) {
+    const token = req.nextauth.token;
+    const isAdmin = token?.role === "admin";
+    const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
+    const isClientRoute = req.nextUrl.pathname.startsWith("/dashboard");
 
-    // Check if the user is trying to access the admin dashboard
-    if (pathname.startsWith("/admin")) {
-      // If there is no token (user not logged in) or the user is not an admin, redirect
-      if (!token || token.role !== "admin") {
-        return NextResponse.redirect(new URL("/unauthorized", request.url));
-      }
+    // If user is admin and trying to access client routes, redirect to admin
+    if (isAdmin && isClientRoute) {
+      return NextResponse.redirect(new URL("/admin", req.url));
     }
+
+    // If user is not admin and trying to access admin routes, redirect to dashboard
+    if (!isAdmin && isAdminRoute) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    return NextResponse.next();
   },
   {
     callbacks: {
@@ -23,13 +28,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    /*
-     * Match all paths except for:
-     * - api routes
-     * - static files
-     * - public pages like login, signup
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico|login|signup|unauthorized).*)",
-  ],
+  matcher: ["/dashboard/:path*", "/admin/:path*"],
 };

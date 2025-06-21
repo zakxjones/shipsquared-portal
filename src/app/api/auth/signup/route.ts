@@ -15,6 +15,10 @@ export async function POST(req: Request) {
     // ✅ Hash password securely
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // ✅ Determine user role based on email domain
+    const isAdmin = email.toLowerCase().endsWith('@shipsquared.com');
+    const userRole = isAdmin ? 'admin' : 'user';
+
     // ✅ Create user in Prisma
     const user = await prisma.user.create({
       data: {
@@ -23,10 +27,16 @@ export async function POST(req: Request) {
         firstName,
         lastName,
         storeName,
+        role: userRole,
       },
     });
 
-    return NextResponse.json({ user }, { status: 201 });
+    return NextResponse.json({ 
+      user: {
+        ...user,
+        password: undefined // Don't send password back
+      }
+    }, { status: 201 });
   } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
