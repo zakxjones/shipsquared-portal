@@ -7,6 +7,15 @@ export default withAuth(
     const isAdmin = token?.role === "admin";
     const pathname = req.nextUrl.pathname;
 
+    // Debug logging
+    console.log('🔍 Middleware Debug:', {
+      email: token?.email,
+      role: token?.role,
+      isAdmin,
+      pathname,
+      shouldBeAdmin: token?.email?.toLowerCase().endsWith('@shipsquared.com')
+    });
+
     // Define protected routes
     const isAdminRoute = pathname.startsWith("/admin");
     const isClientRoute = pathname.startsWith("/dashboard");
@@ -16,11 +25,13 @@ export default withAuth(
     if (isProtectedRoute) {
       // If user is admin and trying to access client routes, redirect to admin
       if (isAdmin && isClientRoute) {
+        console.log('🔄 Admin redirecting from /dashboard to /admin');
         return NextResponse.redirect(new URL("/admin", req.url));
       }
 
       // If user is not admin and trying to access admin routes, redirect to dashboard
       if (!isAdmin && isAdminRoute) {
+        console.log('🔄 User redirecting from /admin to /dashboard');
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
     }
@@ -28,8 +39,10 @@ export default withAuth(
     // If accessing root URL, redirect based on role
     if (pathname === "/") {
       if (isAdmin) {
+        console.log('🔄 Root redirecting admin to /admin');
         return NextResponse.redirect(new URL("/admin", req.url));
       } else {
+        console.log('🔄 Root redirecting user to /dashboard');
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
     }
