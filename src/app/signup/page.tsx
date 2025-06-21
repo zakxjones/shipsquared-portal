@@ -7,6 +7,9 @@ export default function SignupPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [storeName, setStoreName] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -22,6 +25,9 @@ export default function SignupPage() {
       body: JSON.stringify({
         email,
         password,
+        firstName,
+        lastName,
+        storeName,
       }),
     });
 
@@ -44,6 +50,30 @@ export default function SignupPage() {
         onSubmit={handleSignup}
         className="flex flex-col gap-4 w-full max-w-sm"
       >
+        <input
+          type="text"
+          placeholder="First Name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          className="border p-2 rounded"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Last Name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          className="border p-2 rounded"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Store Name"
+          value={storeName}
+          onChange={(e) => setStoreName(e.target.value)}
+          className="border p-2 rounded"
+          required
+        />
         <input
           type="email"
           placeholder="Email"

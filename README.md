@@ -1,12 +1,16 @@
 # 🚀 ShipSquared Client Portal
 
-Welcome to the ShipSquared secure client portal!  
-This project uses:
-- ✅ Next.js (App Router)
-- ✅ NextAuth.js with Prisma Adapter
-- ✅ Credentials-based email + password login
-- ✅ SQLite for easy local dev (Postgres recommended for production)
-- ✅ Fully typed, hashed passwords with bcrypt
+Welcome to the ShipSquared secure client portal! A comprehensive e-commerce order management and fulfillment platform.
+
+## 🎯 Dashboard Goals
+
+ShipSquared Portal is designed to be the central hub for e-commerce businesses to:
+
+- **Unify Order Management**: Connect and manage orders from multiple platforms (Shopify, Amazon, eBay, Etsy, TikTok)
+- **Streamline Fulfillment**: Create shipments, track packages, and manage inventory
+- **Track Performance**: Monitor revenue, order volume, and shipping metrics in real-time
+- **Simplify Logistics**: Handle inbound shipments and coordinate with ShipStation
+- **Grow Business**: Manage referrals and track business growth
 
 ---
 
@@ -18,9 +22,7 @@ This project uses:
 git clone <your-repo-url>
 cd shipsquared-portal
 npm install
-````
-
----
+```
 
 ### 2️⃣ Configure Environment Variables
 
@@ -31,20 +33,13 @@ DATABASE_URL="file:./dev.db"
 NEXTAUTH_SECRET="your-super-secret-string"
 ```
 
-🔑 **Tip:**
-Use `openssl rand -base64 32` to generate a strong `NEXTAUTH_SECRET`.
-
----
+🔑 **Tip:** Use `openssl rand -base64 32` to generate a strong `NEXTAUTH_SECRET`.
 
 ### 3️⃣ Initialize the Database
-
-Prisma will create your local SQLite DB and tables:
 
 ```bash
 npx prisma migrate dev --name init
 ```
-
----
 
 ### 4️⃣ Run Locally
 
@@ -53,76 +48,151 @@ npm run dev
 ```
 
 Visit:
-
-* Sign Up → [http://localhost:3000/signup](http://localhost:3000/signup)
-* Login → [http://localhost:3000/login](http://localhost:3000/login)
-* Dashboard → [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
-
-*(Adjust port if needed — yours is `3002` if you kept your setup!)*
+- Sign Up → [http://localhost:3000/signup](http://localhost:3000/signup)
+- Login → [http://localhost:3000/login](http://localhost:3000/login)
+- Dashboard → [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
 
 ---
 
-## ✅ Features
+## ✅ Core Features
 
-* **Sign Up:**
-  Securely register a user — password is hashed and stored via Prisma.
+### 🔐 Authentication & User Management
+- **Secure Registration**: First name, last name, store name, email, and password
+- **NextAuth.js Integration**: JWT-based sessions with Prisma adapter
+- **Role-based Access**: User and admin roles
+- **Password Security**: bcrypt hashing
 
-* **Login:**
-  Validate email + password using NextAuth Credentials provider.
+### 📊 Dashboard Analytics
+- **Real-time Stats**: Today's and yesterday's revenue, orders, and shipments
+- **Performance Metrics**: Order volume tracking and revenue analysis
+- **ShipStation Integration**: Automatic order import and sync
 
-* **Sessions:**
-  JWT-based sessions for stateless, secure auth.
+### 🔗 Platform Integrations
+- **Multi-platform Support**: Shopify, Amazon, eBay, Etsy, TikTok
+- **OAuth Connections**: Secure platform authentication
+- **Order Synchronization**: Real-time order data from all platforms
+- **Unified Interface**: Single dashboard for all e-commerce activity
 
-* **Protected Pages:**
-  Example `/dashboard` requires login.
+### 📦 Order Management
+- **Order Tracking**: View and manage orders from all connected platforms
+- **Status Updates**: Real-time order status synchronization
+- **Customer Information**: Complete customer details and addresses
+- **Order History**: Comprehensive order tracking and analytics
+
+### 🚚 Shipment Management
+- **Create Shipments**: Generate shipping labels and track packages
+- **Carrier Integration**: Support for multiple shipping carriers
+- **Tracking Numbers**: Automatic tracking number assignment
+- **Shipment History**: Complete shipment tracking and analytics
+
+### 📥 Inbound Shipments
+- **ShipSquared Logistics**: Coordinate inbound shipments through ShipSquared
+- **Manual Freight**: Support for self-coordinated freight shipments
+- **Tracking Integration**: Real-time shipment tracking
+- **Status Management**: Track shipment status from origin to destination
+
+### 💰 Referral System
+- **Business Referrals**: Track and manage business referrals
+- **Referral Bonuses**: Monitor referral qualification and payment status
+- **Lead Management**: Store and track potential business leads
+- **Performance Analytics**: Referral success metrics
+
+### 🏪 Inventory Management
+- **Stock Tracking**: Monitor inventory levels across platforms
+- **Inventory Alerts**: Low stock notifications
+- **Product Management**: Centralized product catalog
+
+### 💳 Billing & Payments
+- **Billing Dashboard**: Track subscription and usage
+- **Payment History**: Complete payment and invoice history
+- **Usage Analytics**: Platform usage and cost tracking
 
 ---
 
 ## 🚀 Deploying
 
-1. Push your project to GitHub.
-
-2. Deploy to [Vercel](https://vercel.com).
-
+1. Push your project to GitHub
+2. Deploy to [Vercel](https://vercel.com)
 3. Add these env vars in Vercel dashboard:
-
-   * `DATABASE_URL` (for production, use Postgres)
-   * `NEXTAUTH_SECRET` (same as local)
-
+   - `DATABASE_URL` (for production, use Postgres)
+   - `NEXTAUTH_SECRET` (same as local)
 4. Done!
 
 ---
 
 ## ⚡️ Tech Stack
 
-* [Next.js](https://nextjs.org/)
-* [NextAuth.js](https://next-auth.js.org/)
-* [Prisma](https://www.prisma.io/)
-* [SQLite](https://www.sqlite.org/index.html) for dev
-* [bcryptjs](https://www.npmjs.com/package/bcryptjs)
+- **Frontend**: [Next.js 15](https://nextjs.org/) with App Router
+- **Authentication**: [NextAuth.js](https://next-auth.js.org/) with Prisma Adapter
+- **Database**: [Prisma](https://www.prisma.io/) with SQLite (dev) / Postgres (prod)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Date Handling**: [date-fns](https://date-fns.org/)
+- **Cron Jobs**: [node-cron](https://www.npmjs.com/package/node-cron)
 
 ---
 
-## 🗂️ Folder Highlights
+## 🗂️ Project Structure
 
 ```
 src/
- ├── app/
- │    ├── api/auth/[...nextauth]/route.ts  # NextAuth config
- │    ├── api/auth/signup/route.ts         # Signup API route
- │    ├── signup/page.tsx                   # Signup form
- │    ├── login/page.tsx                    # Login form
- │    ├── dashboard/page.tsx                # Protected page
+├── app/
+│   ├── api/                    # API routes
+│   │   ├── auth/              # Authentication endpoints
+│   │   ├── dashboard/         # Dashboard analytics
+│   │   ├── integrations/      # Platform connections
+│   │   ├── orders/           # Order management
+│   │   ├── shipments/        # Shipment operations
+│   │   └── referrals/        # Referral system
+│   ├── dashboard/             # Main dashboard pages
+│   │   ├── billing/          # Billing management
+│   │   ├── integrations/     # Platform connections
+│   │   ├── inventory/        # Inventory management
+│   │   ├── orders/           # Order views
+│   │   ├── referrals/        # Referral management
+│   │   └── shipments/        # Shipment management
+│   ├── admin/                # Admin panel
+│   ├── login/                # Authentication pages
+│   └── signup/               # User registration
+├── components/               # Reusable UI components
+├── lib/                     # Utility libraries
+│   ├── platforms/           # Platform integrations
+│   ├── cron/               # Background jobs
+│   └── prisma.ts           # Database client
+└── types/                  # TypeScript definitions
 ```
 
 ---
 
-## 🏁 Ready to build more?
+## 🔄 Recent Updates
 
-* ✅ Add email verification
-* ✅ Add user roles & permissions
-* ✅ Connect to Stripe or ShipStation
-* ✅ Go production-ready with Postgres
+### ✅ User Registration Enhancement
+- Added first name, last name, and store name fields
+- Enhanced user profile management
+- Improved registration flow
+
+### ✅ Code Cleanup
+- Removed debug console.log statements
+- Cleaned up unused dependencies (Supabase)
+- Optimized Prisma logging for production
+- Improved error handling
+
+### ✅ Database Schema
+- Complete user management system
+- Multi-platform order tracking
+- Shipment and inventory management
+- Referral and billing systems
+
+---
+
+## 🏁 Ready to scale?
+
+- ✅ Add email verification
+- ✅ Implement webhook notifications
+- ✅ Add advanced analytics
+- ✅ Integrate with more shipping carriers
+- ✅ Add mobile app support
+- ✅ Implement advanced inventory forecasting
 
 ---
 
