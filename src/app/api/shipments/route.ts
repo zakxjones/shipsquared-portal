@@ -27,9 +27,15 @@ export async function GET(request: Request) {
     const startDate = searchParams.get('dateRange.start');
     const endDate = searchParams.get('dateRange.end');
 
-    const where: any = {};
-    if (user.role !== 'admin') {
-      where.userId = user.id;
+    const where: any = {
+      userId: user.id,
+    };
+
+    if (user.role === 'admin') {
+      return NextResponse.json({
+        shipments: [],
+        pagination: { total: 0, pages: 1, currentPage: 1, limit },
+      });
     }
 
     if (status) {
@@ -51,7 +57,7 @@ export async function GET(request: Request) {
     }
 
     const [shipments, total] = await Promise.all([
-      prisma.inboundShipment.findMany({
+      (prisma.inboundShipment as any).findMany({
         where,
         orderBy: {
           [sortField]: sortOrder,
@@ -64,7 +70,7 @@ export async function GET(request: Request) {
           }
         }
       }),
-      prisma.inboundShipment.count({ where }),
+      (prisma.inboundShipment as any).count({ where }),
     ]);
 
     return NextResponse.json({
@@ -140,7 +146,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const newShipment = await prisma.inboundShipment.create({ data: shipmentData });
+    const newShipment = await (prisma.inboundShipment as any).create({ data: shipmentData });
     return NextResponse.json({ success: true, shipment: newShipment });
   } catch (error) {
     console.error('Failed to create shipment:', error);

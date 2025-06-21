@@ -3,45 +3,45 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  directUrl    = env("DIRECT_URL")
+  relationMode = "prisma"
 }
 
 model User {
-  id             String   @id @default(cuid())
-  name           String?
-  firstName      String?
-  lastName       String?
-  storeName      String?
-  email          String   @unique
-  emailVerified  DateTime?
-  image          String?
-  password       String   // ✅ For hashed passwords
-  role           String   @default("user")
-  sessions       Session[]
-  accounts       Account[]
+  id                  String               @id @default(cuid())
+  name                String?
+  firstName           String?
+  lastName            String?
+  storeName           String?
+  email               String               @unique
+  emailVerified       DateTime?
+  image               String?
+  role                String               @default("user")
+  shipstationStoreId  String?
+  sessions            Session[]
+  accounts            Account[]
   platformConnections PlatformConnection[]
-  orders         Order[]
-  referrals      Referral[] @relation("UserReferrals")
-  shipstationStoreId String?
-  inboundShipments InboundShipment[]
+  orders              Order[]
+  referrals           Referral[]           @relation("UserReferrals")
+  inboundShipments    InboundShipment[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id])
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id])
 
   @@unique([provider, providerAccountId])
 }
@@ -51,8 +51,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
 }
 
 model VerificationToken {
@@ -64,101 +63,94 @@ model VerificationToken {
 }
 
 model PlatformConnection {
-  id            String   @id @default(cuid())
-  userId        String
-  platform      String   // 'shopify', 'amazon', 'ebay', etc.
-  accessToken   String
-  refreshToken  String?
-  expiresAt     DateTime?
-  storeName     String?
-  storeUrl      String?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  user          User     @relation(fields: [userId], references: [id])
-  orders        Order[]
+  id           String    @id @default(cuid())
+  userId       String
+  platform     String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  storeName    String?
+  storeUrl     String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id])
+  orders       Order[]
 
   @@unique([userId, platform, storeName])
 }
 
 model Order {
-  id                  String   @id @default(cuid())
-  userId              String
+  id                   String             @id @default(cuid())
+  userId               String
   platformConnectionId String
-  platformOrderId     String   // Original order ID from the platform
-  orderNumber         String
-  platform            String   // 'shopify', 'amazon', 'ebay', etc.
-  status              String   // 'pending', 'processing', 'shipped', 'delivered', etc.
-  total               Float
-  currency            String   @default("USD")
-  shippingAddress     Json     // Store address as JSON
-  billingAddress      Json     // Store address as JSON
-  items               Json     // Store items as JSON
-  shippingMethod      String?
-  trackingNumber      String?
-  shipstationOrderId  String?  // Reference to ShipStation order
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  user                User     @relation(fields: [userId], references: [id])
-  platformConnection  PlatformConnection @relation(fields: [platformConnectionId], references: [id])
-  shipments           Shipment[] @relation("OrderShipments")
+  platformOrderId      String
+  orderNumber          String
+  platform             String
+  status               String
+  total                Float
+  currency             String             @default("USD")
+  shippingAddress      Json
+  billingAddress       Json
+  items                Json
+  shippingMethod       String?
+  trackingNumber       String?
+  shipstationOrderId   String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  user                 User               @relation(fields: [userId], references: [id])
+  platformConnection   PlatformConnection @relation(fields: [platformConnectionId], references: [id])
+  shipments            Shipment[]         @relation("OrderShipments")
 
   @@unique([platform, platformOrderId])
 }
 
 model Shipment {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   orderId        String
   trackingNumber String?
   carrier        String?
   shippingMethod String?
   shippedAt      DateTime?
-  createdAt      DateTime @default(now())
-  order          Order    @relation("OrderShipments", fields: [orderId], references: [id])
+  createdAt      DateTime  @default(now())
+  order          Order     @relation("OrderShipments", fields: [orderId], references: [id])
 }
 
 model Referral {
-  id                String   @id @default(cuid())
-  referrerId        String   // The user who made the referral
-  firstName         String
-  lastName          String
-  brandName         String
-  site              String?  // Website URL
-  email             String
-  ordersPerMonth    Int      @default(0)
-  referralStatus    String   @default("pending") // pending, contacted, signed_up, active, inactive
-  referralBonusStatus String @default("pending") // pending, qualified, paid
-  notes             String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  referrer          User     @relation("UserReferrals", fields: [referrerId], references: [id])
+  id                  String   @id @default(cuid())
+  referrerId          String
+  firstName           String
+  lastName            String
+  brandName           String
+  site                String?
+  email               String
+  ordersPerMonth      Int      @default(0)
+  referralStatus      String   @default("pending")
+  referralBonusStatus String   @default("pending")
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  referrer            User     @relation("UserReferrals", fields: [referrerId], references: [id])
 
   @@unique([referrerId, email])
 }
 
 model InboundShipment {
-  id             String    @id @default(cuid())
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   userId         String
-  user           User      @relation(fields: [userId], references: [id])
-
-  shipperType    String // "shipsquared" or "manual"
+  shipperType    String
   origin         String?
-
-  // Fields for "ShipSquared Logistics"
   supplier       String?
   shippingMethod String?
   shipTo         String?
-
-  // Fields for "I've coordinated my own freight"
   packingListUrl String?
   shipDate       String?
   palletCount    String?
   eta            String?
-  trackingNumber String?   // Tracking number for the shipment
-
-  status         String    @default("Pending") // e.g., "Pending", "Received", "Cancelled"
-  notes          String?   // Admin notes visible to the client
+  trackingNumber String?
+  status         String   @default("Pending")
+  notes          String?
+  user           User     @relation(fields: [userId], references: [id])
 }

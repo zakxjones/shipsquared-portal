@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { 
   Package, 
@@ -10,9 +10,11 @@ import {
   Send, 
   ChevronDown, 
   Home as HomeIcon,
-  CreditCard
+  CreditCard,
+  Settings
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
 
 const navigation = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
@@ -32,6 +34,22 @@ export default function Sidebar() {
   const pathname = usePathname();
   const isShipmentsRoute = pathname.startsWith('/dashboard/shipments');
   const [shipmentsOpen, setShipmentsOpen] = useState(isShipmentsRoute);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  const router = useRouter();
+
+  useEffect(() => {
+    const getUserEmail = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setUserEmail(session.user.email ?? null);
+      }
+    };
+    getUserEmail();
+  }, [supabase.auth]);
 
   // Open submenu if navigating to a shipments route
   if (isShipmentsRoute && !shipmentsOpen) setShipmentsOpen(true);
@@ -117,6 +135,18 @@ export default function Sidebar() {
           </div>
         )}
       </nav>
+      {userEmail && (
+        <div className="border-t border-gray-800 p-4 flex items-center justify-between">
+          <p className="text-sm text-gray-400">{userEmail}</p>
+          <button
+            aria-label="Settings"
+            onClick={() => router.push('/dashboard/settings')}
+            className="ml-2 text-gray-400 hover:text-white"
+          >
+            <Settings className="h-5 w-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 } 

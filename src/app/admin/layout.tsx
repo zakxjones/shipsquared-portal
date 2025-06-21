@@ -13,10 +13,13 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
 
+  // Check if user has @shipsquared.com email
+  const isAdmin = session?.user?.email?.toLowerCase().endsWith('@shipsquared.com') || false;
+
   if (status === "loading") return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  if (!session?.user || session.user.role !== "admin") {
+  if (!session?.user || !isAdmin) {
     router.replace("/login");
-    return <div>Unauthorized</div>;
+    return <div>Unauthorized - Admin access requires @shipsquared.com email</div>;
   }
 
   const adminNavItems = [
@@ -39,7 +42,7 @@ export default function AdminLayout({
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
-                Welcome, {session.user.firstName || 'Admin'}
+                Welcome, {session.user.firstName || 'Admin'} ({session.user.email})
               </span>
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}

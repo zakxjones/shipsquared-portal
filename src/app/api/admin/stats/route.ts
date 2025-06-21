@@ -9,34 +9,23 @@ export async function GET() {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user is admin
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user || user.role !== "admin") {
-      return Response.json({ error: "Admin access required" }, { status: 403 });
+    // Check if user has @shipsquared.com email
+    const isAdmin = session.user.email.toLowerCase().endsWith('@shipsquared.com');
+    
+    if (!isAdmin) {
+      return Response.json({ error: "Admin access requires @shipsquared.com email" }, { status: 403 });
     }
 
     // Get aggregated statistics
-    const [
-      totalUsers,
-      totalOrders,
-      totalShipments,
-      totalRevenue,
-      activePlatforms,
-      pendingReferrals
-    ] = await Promise.all([
-      prisma.user.count({ where: { role: "user" } }),
-      prisma.order.count(),
-      prisma.shipment.count(),
-      prisma.order.aggregate({
-        where: { status: { in: ["paid", "fulfilled"] } },
-        _sum: { total: true }
-      }),
-      prisma.platformConnection.count({ where: { isActive: true } }),
-      prisma.referral.count({ where: { referralStatus: "pending" } })
-    ]);
+    const totalUsers = await prisma.user.count({ where: { role: "user" } });
+    const totalOrders = await prisma.order.count();
+    const totalShipments = await prisma.shipment.count();
+    const totalRevenue = await prisma.order.aggregate({
+      where: { status: { in: ["paid", "fulfilled"] } },
+      _sum: { total: true }
+    });
+    const activePlatforms = await prisma.platformConnection.count({ where: { isActive: true } });
+    const pendingReferrals = await prisma.referral.count({ where: { referralStatus: "pending" } });
 
     return Response.json({
       totalUsers,

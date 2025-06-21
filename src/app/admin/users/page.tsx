@@ -24,6 +24,9 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Check if user has @shipsquared.com email
+  const isAdmin = session?.user?.email?.toLowerCase().endsWith('@shipsquared.com') || false;
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -39,15 +42,15 @@ export default function AdminUsersPage() {
       }
     };
 
-    if (session?.user?.role === 'admin') {
+    if (isAdmin) {
       fetchUsers();
     }
-  }, [session]);
+  }, [session, isAdmin]);
 
   if (status === "loading") return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  if (!session?.user || session.user.role !== "admin") {
+  if (!session?.user || !isAdmin) {
     router.replace("/login");
-    return <div>Unauthorized</div>;
+    return <div>Unauthorized - Admin access requires @shipsquared.com email</div>;
   }
 
   return (

@@ -9,13 +9,11 @@ export async function GET() {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user is admin
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user || user.role !== "admin") {
-      return Response.json({ error: "Admin access required" }, { status: 403 });
+    // Check if user has @shipsquared.com email
+    const isAdmin = session.user.email.toLowerCase().endsWith('@shipsquared.com');
+    
+    if (!isAdmin) {
+      return Response.json({ error: "Admin access requires @shipsquared.com email" }, { status: 403 });
     }
 
     // Get all users with their order and platform connection counts

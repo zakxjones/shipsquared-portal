@@ -26,10 +26,18 @@ npm install
 
 ### 2️⃣ Configure Environment Variables
 
-Create a `.env.local` in the root:
+Create a `.env.local` in the root and add your Supabase credentials. You can get these from your Supabase project dashboard.
 
 ```env
-DATABASE_URL="file:./dev.db"
+# Get these from your Supabase project's API settings
+NEXT_PUBLIC_SUPABASE_URL="your-supabase-url"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
+
+# This is the direct Postgres connection string for Prisma
+# Get this from your Supabase project's Database settings
+DATABASE_URL="your-supabase-postgres-connection-string"
+
+# A secret string for NextAuth to sign tokens
 NEXTAUTH_SECRET="your-super-secret-string"
 ```
 
@@ -37,8 +45,10 @@ NEXTAUTH_SECRET="your-super-secret-string"
 
 ### 3️⃣ Initialize the Database
 
+This command will sync your Prisma schema with your Supabase database.
+
 ```bash
-npx prisma migrate dev --name init
+npx prisma db push
 ```
 
 ### 4️⃣ Run Locally
@@ -123,8 +133,9 @@ Visit:
 ## ⚡️ Tech Stack
 
 - **Frontend**: [Next.js 15](https://nextjs.org/) with App Router
-- **Authentication**: [NextAuth.js](https://next-auth.js.org/) with Prisma Adapter
-- **Database**: [Prisma](https://www.prisma.io/) with SQLite (dev) / Postgres (prod)
+- **Authentication**: [Supabase Auth](https://supabase.com/auth) with [NextAuth.js](https://next-auth.js.org/) for session management
+- **Database**: [Supabase Postgres](https://supabase.com/database)
+- **ORM**: [Prisma](https://www.prisma.io/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Date Handling**: [date-fns](https://date-fns.org/)

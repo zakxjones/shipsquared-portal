@@ -1,76 +1,53 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        // ✅ Safe guard: check for undefined credentials
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-
-        if (!user) return null;
-
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
-
-        return { 
-          id: user.id, 
-          email: user.email,
-          role: user.role,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          storeName: user.storeName
-        };
-      },
-    }),
+    // CredentialsProvider has been removed as auth is now handled by Supabase
   ],
   session: {
     strategy: "jwt" as const,
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
-        token.storeName = user.storeName;
-      }
-      return token;
-    },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.firstName = token.firstName;
-        session.user.lastName = token.lastName;
-        session.user.storeName = token.storeName;
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.firstName = token.firstName as string;
+        session.user.lastName = token.lastName as string;
+        session.user.storeName = token.storeName as string;
       }
       return session;
+    },
+    async jwt({ token, user: nextAuthUser }) {
+      if (nextAuthUser) {
+        // On initial sign in, `user` object is available.
+        // We need to fetch the full user profile from our database.
+        const dbUser = await prisma.user.findUnique({
+          where: { email: nextAuthUser.email! },
+        });
+        
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+          token.firstName = dbUser.firstName;
+          token.lastName = dbUser.lastName;
+          token.storeName = dbUser.storeName;
+        }
+      }
+      return token;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
 };
 
 const handler = NextAuth(authOptions);
+
 export { handler as GET, handler as POST };
